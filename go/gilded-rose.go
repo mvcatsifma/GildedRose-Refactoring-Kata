@@ -5,6 +5,12 @@ type Item struct {
 	sellIn, quality int
 }
 
+const itemTypeSulfuras = "Sulfuras, Hand of Ragnaros"
+const itemTypeBrie = "Aged Brie"
+const itemTypeBackstagePass = "Backstage passes to a TAFKAL80ETC concert"
+
+const sulfurasQuality = 80
+
 func UpdateQuality(items []*Item) {
 	for i := 0; i < len(items); i++ {
 
