@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type Item struct {
 	name            string
 	sellIn, quality int
@@ -9,56 +11,69 @@ const itemTypeSulfuras = "Sulfuras, Hand of Ragnaros"
 const itemTypeBrie = "Aged Brie"
 const itemTypeBackstagePass = "Backstage passes to a TAFKAL80ETC concert"
 
+const maxQuality = 50
+const minQuality = 0
+
 const sulfurasQuality = 80
 
+const defaultQualityIncrease = 1
+const defaultQualityDecrease = 1
+
+const expiredQualityIncrease = 2
+const expiredQualityDecrease = 2
+
 func UpdateQuality(items []*Item) {
-	for i := 0; i < len(items); i++ {
-
-		if items[i].name != "Aged Brie" && items[i].name != "Backstage passes to a TAFKAL80ETC concert" {
-			if items[i].quality > 0 {
-				if items[i].name != "Sulfuras, Hand of Ragnaros" {
-					items[i].quality = items[i].quality - 1
-				}
-			}
-		} else {
-			if items[i].quality < 50 {
-				items[i].quality = items[i].quality + 1
-				if items[i].name == "Backstage passes to a TAFKAL80ETC concert" {
-					if items[i].sellIn < 11 {
-						if items[i].quality < 50 {
-							items[i].quality = items[i].quality + 1
-						}
-					}
-					if items[i].sellIn < 6 {
-						if items[i].quality < 50 {
-							items[i].quality = items[i].quality + 1
-						}
-					}
-				}
-			}
-		}
-
-		if items[i].name != "Sulfuras, Hand of Ragnaros" {
-			items[i].sellIn = items[i].sellIn - 1
-		}
-
-		if items[i].sellIn < 0 {
-			if items[i].name != "Aged Brie" {
-				if items[i].name != "Backstage passes to a TAFKAL80ETC concert" {
-					if items[i].quality > 0 {
-						if items[i].name != "Sulfuras, Hand of Ragnaros" {
-							items[i].quality = items[i].quality - 1
-						}
-					}
-				} else {
-					items[i].quality = items[i].quality - items[i].quality
-				}
-			} else {
-				if items[i].quality < 50 {
-					items[i].quality = items[i].quality + 1
-				}
-			}
-		}
+	for _, item := range items {
+		updateQuality(item, item.sellIn < 0)
+		updateSellIn(item)
 	}
+}
 
+func updateQuality(item *Item, expired bool) {
+	if !expired {
+		handle(item)
+	} else {
+		handleExpired(item)
+	}
+}
+
+func handle(item *Item) {
+	switch item.name {
+	case itemTypeBackstagePass:
+		increase := defaultQualityIncrease // quality of backstage passes increases by 1
+		if item.sellIn <= 5 {
+			increase = 3 // quality increases by 3 when there are 5 days or less
+		} else if item.sellIn <= 10 {
+			increase = 2 // quality increases by 2 when there are 10 days or less
+		}
+		item.quality = int(math.Min(maxQuality, float64(item.quality+increase)))
+	case itemTypeBrie:
+		item.quality = int(math.Min(maxQuality, float64(item.quality+defaultQualityIncrease))) // "Aged Brie" increases in Quality the older it gets
+	case itemTypeSulfuras:
+		// sulfuras' quality does not change
+	default:
+		item.quality = int(math.Max(minQuality, float64(item.quality-defaultQualityDecrease))) // by default items decrease in quality
+	}
+}
+
+func handleExpired(item *Item) {
+	switch item.name {
+	case itemTypeBackstagePass:
+		item.quality = minQuality // expired backstage passes have zero value
+	case itemTypeBrie:
+		item.quality = int(math.Min(maxQuality, float64(item.quality+expiredQualityIncrease))) // "Aged Brie" increases in Quality the older it gets
+	case itemTypeSulfuras:
+		// sulfuras' quality does not change
+	default:
+		item.quality = int(math.Max(minQuality, float64(item.quality-expiredQualityDecrease))) // expired items degrade twice as fast
+	}
+}
+
+func updateSellIn(item *Item) {
+	switch item.name {
+	case itemTypeSulfuras:
+		// sulfuras' sellIn does not change
+	default:
+		item.sellIn = item.sellIn - 1
+	}
 }
