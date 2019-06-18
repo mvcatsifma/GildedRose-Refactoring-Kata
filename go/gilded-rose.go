@@ -10,6 +10,7 @@ type Item struct {
 const itemTypeSulfuras = "Sulfuras, Hand of Ragnaros"
 const itemTypeBrie = "Aged Brie"
 const itemTypeBackstagePass = "Backstage passes to a TAFKAL80ETC concert"
+const itemTypeConjured = "Conjured"
 
 const maxQuality = 50
 const minQuality = 0
@@ -51,6 +52,8 @@ func handle(item *Item) {
 		item.quality = int(math.Min(maxQuality, float64(item.quality+defaultQualityIncrease))) // "Aged Brie" increases in Quality the older it gets
 	case itemTypeSulfuras:
 		// sulfuras' quality does not change
+	case itemTypeConjured:
+		item.quality = int(math.Max(minQuality, float64(item.quality-defaultQualityDecrease*2))) // by default items decrease in quality
 	default:
 		item.quality = int(math.Max(minQuality, float64(item.quality-defaultQualityDecrease))) // by default items decrease in quality
 	}
@@ -64,6 +67,8 @@ func handleExpired(item *Item) {
 		item.quality = int(math.Min(maxQuality, float64(item.quality+expiredQualityIncrease))) // "Aged Brie" increases in Quality the older it gets
 	case itemTypeSulfuras:
 		// sulfuras' quality does not change
+	case itemTypeConjured:
+		item.quality = int(math.Max(minQuality, float64(item.quality-expiredQualityDecrease*2))) // by default items decrease in quality
 	default:
 		item.quality = int(math.Max(minQuality, float64(item.quality-expiredQualityDecrease))) // expired items degrade twice as fast
 	}

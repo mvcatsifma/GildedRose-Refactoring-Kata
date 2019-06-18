@@ -243,3 +243,39 @@ func Test_QualityOfBackstagePassWithSellInTenNeverMoreThanFifty(t *testing.T) {
 		t.Errorf("sellIn: Expected %v but got %v ", expectedSellIn, item.sellIn)
 	}
 }
+
+func Test_QualityOfConjuredItemDegradesTwiceAsFast(t *testing.T) {
+	items := []*Item{
+		{name: itemTypeConjured, quality: 10, sellIn: 1},
+	}
+	expectedQuality := 8
+	expectedSellIn := 0
+
+	UpdateQuality(items)
+
+	item := items[0]
+	if item.quality != expectedQuality {
+		t.Errorf("quality: Expected %v but got %v ", expectedQuality, item.quality)
+	}
+	if item.sellIn != expectedSellIn {
+		t.Errorf("sellIn: Expected %v but got %v ", expectedSellIn, item.sellIn)
+	}
+}
+
+func Test_QualityOfExpiredConjuredItemDegradesTwiceAsFast(t *testing.T) {
+	items := []*Item{
+		{name: itemTypeConjured, quality: 10, sellIn: -1},
+	}
+	expectedQuality := 6
+	expectedSellIn := -2
+
+	UpdateQuality(items)
+
+	item := items[0]
+	if item.quality != expectedQuality {
+		t.Errorf("quality: Expected %v but got %v ", expectedQuality, item.quality)
+	}
+	if item.sellIn != expectedSellIn {
+		t.Errorf("sellIn: Expected %v but got %v ", expectedSellIn, item.sellIn)
+	}
+}
